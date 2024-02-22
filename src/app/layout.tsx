@@ -2,8 +2,9 @@ import "~/styles/globals.css";
 
 import { Inter } from "next/font/google";
 
+import { Toaster } from "~/components/ui/toaster";
 import { TRPCReactProvider } from "~/trpc/react";
-import Header from "~/app/_components/header";
+import Header from "~/components/header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <Header />
           <main className="flex-grow">{children}</main>
+          <Toaster />
         </TRPCReactProvider>
       </body>
     </html>
