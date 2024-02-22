@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  portfolio-tracker-v2-postgres:
+    image: postgres:latest
+    container_name: portfolio-tracker-v2-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: portfolio-tracker-v2
+    ports:
+      - "5432:5432"
+    # Optionally, you can provide additional configurations here if needed
