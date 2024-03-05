@@ -1,8 +1,11 @@
 "use client";
 
-import { ChevronDown, X, Search } from "lucide-react";
+import { ChevronDown, X, Search, ArrowDown } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { DatePicker } from "~/components/ui/date-picker";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useModal } from "~/lib/hooks/use-modal";
 import { api } from "~/trpc/react";
@@ -139,34 +142,97 @@ const TokenSelector: React.FC<{ onClick: () => void; token?: Token }> = ({
   );
 };
 
-const SwapCard = ({ text }: { text: string }) => {
+const SwapCard = ({
+  text,
+  showCut = false,
+  token,
+  setToken,
+  onAmountChange,
+  amount,
+}: {
+  text: string;
+  showCut?: boolean;
+  token?: Token;
+  setToken: (token: Token) => void;
+  onAmountChange: (amount: number) => void;
+  amount?: number;
+}) => {
   const modalProps = useModal();
   const { openModal } = modalProps;
 
-  const [selectedToken, setSelectedToken] = useState<Token>();
-
   return (
     <>
-      <div className="relative flex w-96 flex-col rounded-xl bg-[#1b1b1b] p-4 ring-[#1b1b1b] hover:ring-1">
+      <div className="relative flex flex-col rounded-xl bg-[#1b1b1b] p-4 ring-0 ring-[#252628] hover:ring-1">
         <p className="text-sm">{text}</p>
         <input
           className="w-4/5 bg-[#1b1b1b] text-4xl text-white placeholder-gray-400 outline-none"
           placeholder="0"
+          type="number"
+          name="amount"
+          id="amount"
+          onChange={(e) => onAmountChange(Number(e.target.value))}
+          value={amount}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <TokenSelector token={selectedToken} onClick={openModal} />
+          <TokenSelector token={token} onClick={openModal} />
         </div>
+        {showCut && (
+          <div className="absolute -bottom-5 left-1/2 z-10 h-10 w-10 -translate-x-1/2 rounded-lg bg-[#131313]"></div>
+        )}
       </div>
-      <TokenSelectorModal onSelect={setSelectedToken} {...modalProps} />
+      <TokenSelectorModal onSelect={setToken} {...modalProps} />
     </>
   );
 };
 
 export default function Home() {
+  const [firstToken, setFirstToken] = useState<Token>();
+  const [secondToken, setSecondToken] = useState<Token>();
+
+  const [firstAmount, setFirstAmount] = useState<number>();
+  const [secondAmount, setSecondAmount] = useState<number>();
+
+  const [date, setDate] = useState<Date>();
+
+  const swapTokens = () => {
+    const temp = firstToken;
+    setFirstToken(secondToken);
+    setSecondToken(temp);
+    const tempAmount = firstAmount;
+    setFirstAmount(secondAmount);
+    setSecondAmount(tempAmount);
+  };
+
   return (
-    <main className="flex flex-col gap-1">
-      <SwapCard text="You pay" />
-      <SwapCard text="You pay" />
+    <main className="mx-auto flex max-w-[400px] flex-col gap-4">
+      <div className="relative flex flex-col gap-1">
+        <SwapCard
+          text="You pay"
+          showCut
+          token={firstToken}
+          setToken={setFirstToken}
+          onAmountChange={setFirstAmount}
+          amount={firstAmount}
+        />
+        <SwapCard
+          text="You pay"
+          token={secondToken}
+          setToken={setSecondToken}
+          onAmountChange={setSecondAmount}
+          amount={secondAmount}
+        />
+        <button
+          className="absolute left-1/2 top-1/2 z-20 flex h-8 w-8 -translate-x-1/2 -translate-y-[55%] items-center justify-center rounded-md bg-[#1b1b1b]"
+          onClick={swapTokens}
+        >
+          <ArrowDown color="white" size={18} />
+        </button>
+      </div>
+      <Label className="text-gray flex flex-col gap-2 text-xs" id="fromPrice">
+        {firstToken?.name ?? "Token"} price:
+        <Input className="" name="fromPrice" type="number" />
+      </Label>
+      <DatePicker onSelect={setDate} label="Day of the trade" />
     </main>
   );
 }
